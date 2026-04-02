@@ -5,8 +5,6 @@ using ERP.Application.Sercurity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -28,27 +26,31 @@ public class TokenService : ITokenService
         var jti = Guid.NewGuid().ToString("N");
         var exp = DateTime.UtcNow.AddMinutes(_opt.AccessTokenMinutes);
 
-        var claims = new List<Claim>
-        {
-            new(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
-            new(JwtRegisteredClaimNames.Email, user.Email),
-            new(ClaimTypes.Role, user.RoleName),
-            new(JwtRegisteredClaimNames.Jti, jti),
-            new("amr", isMfaVerified ? "mfa" : "pwd")
-        };
-
-        if (user.UserPermissions is not null)
-            claims.AddRange(user.UserPermissions.Select(p => new Claim("perm", p)));
-
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_opt.SecretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var payload = new Dictionary<string, object>
+        {
+            ["sub"] = user.UserId.ToString(),
+            ["email"] = user.Email,
+            ["role"] = user.RoleName,
+            ["jti"] = jti,
+            ["amr"] = isMfaVerified ? "mfa" : "pwd"
+        };
+
+        if (user.UserPermissions is not null && user.UserPermissions.Any())
+            payload["perm"] = user.UserPermissions.ToArray();
 
         var jwt = new JwtSecurityToken(
             issuer: _opt.Issuer,
             audience: _opt.Audience,
-            claims: claims,
+            claims: null,
+            notBefore: DateTime.UtcNow,
             expires: exp,
             signingCredentials: creds);
+
+        foreach (var kv in payload)
+            jwt.Payload[kv.Key] = kv.Value;
 
         var token = new JwtSecurityTokenHandler().WriteToken(jwt);
         return new AccessTokenResult(token, jti, exp);
@@ -68,17 +70,15 @@ public class TokenService : ITokenService
     {
         var hash = HashToken(refreshToken);
         var existing = await _repo.GetRefreshTokenAsync(hash);
-        if (existing is null) return null;
-        if (existing.Value.RevokedAtUtc is not null) return null;
-        if (existing.Value.ExpiresAtUtc <= DateTime.UtcNow) return null;
+        if (existing is null || existing.Value.RevokedAtUtc is not null || existing.Value.ExpiresAtUtc <= DateTime.UtcNow)
+            return null;
 
         var user = await _repo.GetUserForLoginAsyncById(existing.Value.UserId);
         if (user is null || user.IsDeleted) return null;
 
-        var access = GenerateAccessToken(user, isMfaVerified: true); // refresh coi như đã qua MFA session
+        var access = GenerateAccessToken(user, isMfaVerified: true);
         var newRaw = await GenerateAndStoreRefreshTokenAsync(user.UserId, access.JwtId, ip, userAgent);
 
-        // revoke old refresh token, replacedBy chưa map id mới thì để null
         await _repo.RevokeRefreshTokenAsync(existing.Value.Id, ip, null);
 
         return new TokenResponse(access.Token, newRaw, access.ExpiresAtUtc);
@@ -88,8 +88,7 @@ public class TokenService : ITokenService
     {
         var hash = HashToken(refreshToken);
         var existing = await _repo.GetRefreshTokenAsync(hash);
-        if (existing is null) return;
-        if (existing.Value.RevokedAtUtc is not null) return;
+        if (existing is null || existing.Value.RevokedAtUtc is not null) return;
 
         await _repo.RevokeRefreshTokenAsync(existing.Value.Id, ip, null);
     }

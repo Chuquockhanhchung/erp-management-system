@@ -1,6 +1,7 @@
 ﻿using ERP.Application.DTOs;
 using ERP.Application.DTOs.Auth;
 using ERP.Application.Interfaces;
+using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace ERP.Application.Services;
 
@@ -83,7 +84,7 @@ public class AuthService : IAuthService
 
     public async Task<LoginResult?> VerifyMfaLoginAsync(DTOs.MfaLoginVerifyRequest req, string ip, string userAgent)
     {
-        var principal = _tempToken.ValidateMfaTempToken(req.TempToken);
+        var principal = _tempToken.ValidateMfaTempTokenRaw(req.TempToken);
         if (principal is null) return null;
 
         var sub = principal.FindFirst("sub")?.Value;
@@ -102,7 +103,7 @@ public class AuthService : IAuthService
         var access = _token.GenerateAccessToken(user, isMfaVerified: true);
         var refresh = await _token.GenerateAndStoreRefreshTokenAsync(user.UserId, access.JwtId, ip, userAgent);
 
-        await _repo.UpdateLastMfaAsync(user.UserId, DateTime.UtcNow);
+        await _repo.UpdateLastMfaAsync(user.UserId, DateTime.Now);
         await _audit.WriteSecurityEventAsync(user.UserId, "MFA_SUCCESS", user.Email, ip, userAgent, null);
         await _audit.WriteSecurityEventAsync(user.UserId, "LOGIN_SUCCESS", user.Email, ip, userAgent, "mfa=true");
 

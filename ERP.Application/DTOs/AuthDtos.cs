@@ -14,3 +14,9 @@ public record AccessTokenResult(
     string JwtId,
     DateTime ExpiresAtUtc
 );
+public record MfaEnableRequest(string Code);
+public record MfaSetupResponse(
+    string ManualKey,
+    string QrCodeUri,
+    string[] RecoveryCodes
+);

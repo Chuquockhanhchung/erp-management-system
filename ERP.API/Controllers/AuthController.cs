@@ -11,6 +11,7 @@ namespace ERP.API.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _auth;
+    
     public AuthController(IAuthService auth) => _auth = auth;
 
     [HttpPost("login")]

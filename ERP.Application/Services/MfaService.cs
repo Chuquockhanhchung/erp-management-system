@@ -50,6 +50,7 @@ public class MfaService : IMfaService
         if (!ok) return false;
 
         await _repo.EnableMfaAsync(userId);
+        await _repo.UpdateLastMfaAsync(userId, DateTime.Now); 
         return true;
     }
 

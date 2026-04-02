@@ -42,10 +42,10 @@ namespace ERP.Application.Interfaces
 
     public interface ITokenService
     {
-        (string accessToken, string jti, DateTime expUtc) CreateAccessToken(AuthUserRecord user, bool isMfaVerified);
-        string CreateRefreshTokenRaw();
         AccessTokenResult GenerateAccessToken(AuthUserRecord user, bool isMfaVerified = false);
-        string HashToken(string raw);
+        Task<string> GenerateAndStoreRefreshTokenAsync(int userId, string jwtId, string ip, string userAgent);
+        Task<TokenResponse?> RefreshAsync(string refreshToken, string ip, string userAgent);
+        Task LogoutAsync(string refreshToken, string ip);
     }
 
     public interface IPasswordHasher

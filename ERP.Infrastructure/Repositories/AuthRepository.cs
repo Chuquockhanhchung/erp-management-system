@@ -102,7 +102,7 @@ public class AuthRepository : IAuthRepository
     {
         var u = await _db.Users.FirstAsync(x => x.Id == userId);
         u.MfaEnabled = true;
-        u.LastMfaAtUtc = DateTime.UtcNow;
+        u.LastMfaAtUtc = DateTime.Now;
         await _db.SaveChangesAsync();
     }
 

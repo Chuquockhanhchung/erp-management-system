@@ -41,8 +41,15 @@ builder.Services.Configure<SecurityOptions>(builder.Configuration.GetSection("Se
 
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
-builder.Services.AddScoped<IMfaService, MfaService>();
+
 builder.Services.AddDataProtection();
+builder.Services.AddScoped<IDataProtectorService, DataProtectorService>();
+builder.Services.AddScoped<IMfaService, MfaService>();
+builder.Services.AddScoped<IAuditRepository, AuditRepository>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
+builder.Services.AddScoped<IAuditService, AuditService>();
+builder.Services.AddScoped<ITempTokenService, TempTokenService>();
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
@@ -51,12 +58,11 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IAdminUserRepository, AdminUserRepository>();
 builder.Services.AddScoped<IAdminUserService, AdminUserService>();
 
-builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
-builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
-builder.Services.AddScoped<IAuditService, AuditService>();
-builder.Services.AddScoped<IAuditRepository, AuditRepository>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+
+
 var jwt = builder.Configuration.GetSection("Jwt").Get<JwtOptions>()!;
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opt =>
