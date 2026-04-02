@@ -239,3 +239,130 @@ BEGIN
     COMMIT;
 END;
 GO
+-- =============================================
+-- 🔐 ROLES
+-- =============================================
+INSERT INTO Roles (Name) VALUES 
+('Admin'),
+('Staff'),
+('Customer');
+
+-- =============================================
+-- 👤 USERS
+-- =============================================
+INSERT INTO Users (FullName, Email, PasswordHash, RoleId)
+VALUES 
+('Admin System', 'admin@erp.com', 'hashed_pw', 1),
+('Nguyen Van Dev', 'dev@erp.com', 'hashed_pw', 2),
+('Tran Thi Staff', 'staff@erp.com', 'hashed_pw', 2);
+
+-- =============================================
+-- 👥 CUSTOMERS
+-- =============================================
+INSERT INTO Customers (Name, Phone, Email)
+VALUES 
+('Nguyen Van A', '0123456789', 'a@gmail.com'),
+('Tran Thi B', '0987654321', 'b@gmail.com'),
+('Le Van C', '0911222333', 'c@gmail.com');
+
+-- =============================================
+-- 🏬 WAREHOUSES
+-- =============================================
+INSERT INTO Warehouses (Name, Location)
+VALUES 
+('Kho Hà Nội', 'Hoan Kiem, Ha Noi'),
+('Kho Hồ Chí Minh', 'District 1, HCM'),
+('Kho Đà Nẵng', 'Hai Chau, Da Nang');
+
+-- =============================================
+-- 📦 PRODUCTS
+-- =============================================
+INSERT INTO Products (Name, Price)
+VALUES 
+('Laptop Dell XPS 13', 25000000),
+('Macbook Pro M2', 35000000),
+('Chuột Logitech MX Master', 2000000),
+('Bàn phím cơ Keychron', 3000000),
+('Màn hình LG 27 inch', 5000000);
+
+-- =============================================
+-- 📊 INVENTORY (PHÂN BỔ KHO)
+-- =============================================
+
+-- Hà Nội
+INSERT INTO Inventory (ProductId, WarehouseId, Quantity)
+VALUES 
+(1, 1, 10),
+(2, 1, 5),
+(3, 1, 50),
+(4, 1, 30),
+(5, 1, 20);
+
+-- HCM
+INSERT INTO Inventory (ProductId, WarehouseId, Quantity)
+VALUES 
+(1, 2, 8),
+(2, 2, 6),
+(3, 2, 40),
+(4, 2, 25),
+(5, 2, 15);
+
+-- Đà Nẵng
+INSERT INTO Inventory (ProductId, WarehouseId, Quantity)
+VALUES 
+(1, 3, 5),
+(2, 3, 3),
+(3, 3, 20),
+(4, 3, 15),
+(5, 3, 10);
+
+-- =============================================
+-- 📜 INVENTORY TRANSACTIONS (LỊCH SỬ NHẬP KHO)
+-- =============================================
+INSERT INTO InventoryTransactions (ProductId, WarehouseId, QuantityChange, TransactionType, ReferenceId)
+VALUES
+(1,1,10,'IMPORT',NULL),
+(2,1,5,'IMPORT',NULL),
+(3,1,50,'IMPORT',NULL),
+(1,2,8,'IMPORT',NULL),
+(2,2,6,'IMPORT',NULL);
+
+-- =============================================
+-- 🧾 ORDERS
+-- =============================================
+INSERT INTO Orders (CustomerId, Status, TotalAmount)
+VALUES 
+(1, 'Completed', 27000000),
+(2, 'Pending', 5000000);
+
+-- =============================================
+-- 📄 ORDER DETAILS
+-- =============================================
+INSERT INTO OrderDetails (OrderId, ProductId, Quantity, Price)
+VALUES 
+(1, 1, 1, 25000000),
+(1, 3, 1, 2000000),
+(2, 5, 1, 5000000);
+
+-- =============================================
+-- 💰 INVOICES
+-- =============================================
+INSERT INTO Invoices (OrderId, TotalAmount, Status)
+VALUES 
+(1, 27000000, 'PAID'),
+(2, 5000000, 'UNPAID');
+
+-- =============================================
+-- 💳 PAYMENTS
+-- =============================================
+INSERT INTO Payments (InvoiceId, Amount, PaymentMethod, PaidAt)
+VALUES 
+(1, 27000000, 'Bank Transfer', GETDATE());
+
+-- =============================================
+-- 📜 AUDIT LOG (DEMO)
+-- =============================================
+INSERT INTO AuditLogs (TableName, Action, OldData, NewData, UserId)
+VALUES 
+('Products', 'UPDATE', '{"Price":25000000}', '{"Price":24000000}', 1),
+('Orders', 'INSERT', NULL, '{"OrderId":1}', 2);

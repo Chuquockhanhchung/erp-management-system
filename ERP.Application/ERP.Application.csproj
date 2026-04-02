@@ -1,6 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Core" Version="1.6.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="9.0.14" />
+    <PackageReference Include="Microsoft.AspNetCore.Authorization.Policy" Version="2.3.9" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.Abstractions" Version="9.0.14" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.14" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.83.3" />
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.0.1" />
+    <PackageReference Include="Otp.NET" Version="1.4.1" />
+    <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
+    <PackageReference Include="QRCoder" Version="1.7.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ERP.Domain\ERP.Domain.csproj" />
   </ItemGroup>
 

@@ -6,13 +6,12 @@ using System.Threading.Tasks;
 
 namespace ERP.Domain.Entities
 {
-    public class Product
+    public class Order
     {
-       
         public int Id { get; set; }
-        public string Name { get; set; } = default!;
-        public decimal? Price { get; set; }
-        public bool? IsDeleted { get; set; }
+        public int? CustomerId { get; set; }
+        public string Status { get; set; } = default!;
+        public decimal? TotalAmount { get; set; }
         public DateTime? CreatedAt { get; set; }
     }
 }
